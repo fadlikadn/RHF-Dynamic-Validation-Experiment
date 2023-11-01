@@ -1,6 +1,7 @@
 {
-  "name": "RHF Dynamic Validation",
+  "name": "rhf-dynamic-validation",
   "version": "1.0.0",
+  "license": "MIT",
   "description": "",
   "keywords": [],
   "main": "src/index.tsx",
