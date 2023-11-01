@@ -11,16 +11,15 @@ interface ShoppingFormModel {
 }
 
 export default function App() {
-  const { control, handleSubmit, watch, register, setValue } = useForm<
-    ShoppingFormModel
-  >({
-    defaultValues: {
-      sections: []
-    }
-  });
+  const { control, handleSubmit, watch, register, setValue, getValues } =
+    useForm<ShoppingFormModel>({
+      defaultValues: {
+        sections: [],
+      },
+    });
   const { fields, append, remove } = useFieldArray({
     control,
-    name: "sections"
+    name: "sections",
   });
 
   const onSubmit = (data: ShoppingFormModel) => {
@@ -32,7 +31,7 @@ export default function App() {
   const maxQuantities = {
     airMineral: 10,
     buku: 5,
-    spidol: 7
+    spidol: 7,
   };
 
   const totalItems = watch("sections");
@@ -51,7 +50,7 @@ export default function App() {
     return {
       airMineral: totalAirMineral,
       buku: totalBuku,
-      spidol: totalSpidol
+      spidol: totalSpidol,
     };
   };
 
@@ -62,6 +61,25 @@ export default function App() {
 
   const isInputEnabled = (item: keyof SectionModel, section: SectionModel) => {
     return getTotalQuantity()[item] + section[item] < maxQuantities[item];
+  };
+
+  const calculateRemainingAirMineral = () => {
+    const totalAirMineral = getTotalQuantity().airMineral;
+    return maxQuantities.airMineral - totalAirMineral;
+  };
+
+  const hideAirMineralInput = calculateRemainingAirMineral() <= 0;
+
+  const addSection = () => {
+    let airMineralInitialValue = calculateRemainingAirMineral();
+    if (hideAirMineralInput) {
+      airMineralInitialValue = 0;
+    }
+    append({
+      airMineral: airMineralInitialValue,
+      buku: 0,
+      spidol: 0,
+    });
   };
 
   const updateAirMineral = (sectionIndex: number, value: number) => {
@@ -80,7 +98,7 @@ export default function App() {
         // Enable/disable the airMineral input in other sections
         setValue(
           `sections.${i}.airMineral`,
-          airMineralEnabled ? section.airMineral : 0
+          airMineralEnabled ? section.airMineral : 0,
         );
       }
     }
@@ -92,23 +110,29 @@ export default function App() {
       {fields.map((section, index) => (
         <div key={section.id}>
           <h3>Section {index + 1}</h3>
-          <label htmlFor={`sections[${index}].airMineral`}>Air Mineral:</label>
-          <input
-            type="number"
-            // value={section.airMineral}
-            onChange={(e) => updateAirMineral(index, Number(e.target.value))}
-            // disabled={!isInputEnabled("airMineral", section)}
-            {...register(`sections.${index}.airMineral`, {
-              validate: (value) =>
-                value <= maxQuantities.airMineral || "Exceeds maximum quantity!"
-            })}
-          />
+          <label htmlFor={`sections.${index}.airMineral`}>Air Mineral:</label>
+          {hideAirMineralInput &&
+          Number(getValues(`sections.${index}.airMineral`)) === 0 ? (
+            <div>Hidden</div>
+          ) : (
+            <input
+              type="number"
+              // disabled={!isInputEnabled("airMineral", section)}
+              {...register(`sections.${index}.airMineral`, {
+                validate: (value) =>
+                  value <= maxQuantities.airMineral ||
+                  "Exceeds maximum quantity!",
+              })}
+              // onChange={(e) => updateAirMineral(index, Number(e.target.value))}
+            />
+          )}
+
           <label htmlFor={`sections[${index}].buku`}>Buku:</label>
           <input
             type="number"
             {...register(`sections.${index}.buku`, {
               validate: (value) =>
-                value <= maxQuantities.buku || "Exceeds maximum quantity!"
+                value <= maxQuantities.buku || "Exceeds maximum quantity!",
             })}
             // disabled={!isInputEnabled("buku", section)}
           />
@@ -117,7 +141,7 @@ export default function App() {
             type="number"
             {...register(`sections.${index}.spidol`, {
               validate: (value) =>
-                value <= maxQuantities.spidol || "Exceeds maximum quantity!"
+                value <= maxQuantities.spidol || "Exceeds maximum quantity!",
             })}
             // disabled={!isInputEnabled("spidol", section)}
           />
@@ -127,16 +151,7 @@ export default function App() {
           </button>
         </div>
       ))}
-      <button
-        type="button"
-        onClick={() =>
-          append({
-            airMineral: 0,
-            buku: 0,
-            spidol: 0
-          })
-        }
-      >
+      <button type="button" onClick={addSection}>
         Add Section
       </button>
       <div>Total Sections: {totalItems.length}</div>

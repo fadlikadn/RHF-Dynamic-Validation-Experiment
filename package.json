@@ -1,5 +1,5 @@
 {
-  "name": "dynamic-validation",
+  "name": "RHF Dynamic Validation",
   "version": "1.0.0",
   "description": "",
   "keywords": [],
@@ -12,8 +12,8 @@
     "react-scripts": "5.0.1"
   },
   "devDependencies": {
-    "@types/react": "18.0.25",
-    "@types/react-dom": "18.0.9",
+    "@types/react": "^18.2.33",
+    "@types/react-dom": "^18.2.14",
     "typescript": "4.4.2"
   },
   "scripts": {
